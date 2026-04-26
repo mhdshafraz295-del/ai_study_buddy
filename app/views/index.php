@@ -1,3 +1,7 @@
+<?php
+session_start();    
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -805,6 +809,14 @@
             max-width: 300px;
         }
 
+         .created-by {
+            text-align: center;
+            margin-top: 24px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+            font-size: 12px;
+            color: var(--text-muted);}
+
         /* Mobile Menu Toggle */
         .mobile-menu-toggle {
             display: none;
@@ -1147,6 +1159,8 @@
                 padding: 20px;
                 min-height: 150px;
             }
+            
+       
         }
 
         /* Touch device optimizations */
@@ -1264,36 +1278,32 @@
                     Dashboard
                 </a>
             </div>
+     
+       <div class="recent-pdfs mt-6">
+    <h3 style="text-transform: uppercase; font-size: 0.75rem; font-weight: 700; color: #d0d6e0;">Recent PDFS</h3>
+    <ul class="space-y-1">
+        <?php
+        if (isset($conn) && isset($_SESSION['user_id'])) {
+            $user_id = $_SESSION['user_id'];
+            $query = "SELECT file_name FROM documents WHERE user_id = '$user_id' ORDER BY id DESC LIMIT 5";
+            $result = mysqli_query($conn, $query);
 
-            <div class="history-section">
-                <div class="history-title">Recent PDFs</div>
-                <ul class="history-list">
-                    <li class="history-item">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                        </svg>
-                        <span class="history-item-name">Physics_Notes.pdf</span>
-                    </li>
-                    <li class="history-item">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                        </svg>
-                        <span class="history-item-name">History_Lesson.pdf</span>
-                    </li>
-                    <li class="history-item">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                        </svg>
-                        <span class="history-item-name">Math_Formulas.pdf</span>
-                    </li>
-                    <li class="history-item">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                        </svg>
-                        <span class="history-item-name">Chemistry_Ch8.pdf</span>
-                    </li>
-                </ul>
-            </div>
+            if ($result && mysqli_num_rows($result) > 0) {
+                while ($row = mysqli_fetch_assoc($result)) {
+                    echo '<li class="flex items-center px-4 py-2 text-sm text-gray-400 hover:text-white hover:bg-gray-800 cursor-pointer transition-all group">';
+                    echo '<i class="far fa-file-pdf mr-3 text-red-500 group-hover:scale-110 transition-transform"></i>';
+                    echo '<span class="truncate">' . htmlspecialchars($row['file_name']) . '</span>';
+                    echo '</li>';
+                }
+            } else {
+                echo '<li class="px-4 py-2 text-xs text-gray-600 italic">No files found</li>';
+            }
+        }
+        ?>
+    </ul>
+</div>
+
+        
         </nav>
     </aside>
 
@@ -1369,7 +1379,16 @@
                     <div class="user-profile" id="userProfile" onclick="toggleUserDropdown()">
                         <div class="user-avatar">JS</div>
                         <div class="user-info">
-                            <span class="user-name">John Smith</span>
+                            <span class="user-name">
+                                <?php
+                                // Assuming you have a session variable for the user's name
+                                if (isset($_SESSION['first_name']) && isset($_SESSION['last_name'])) {
+                                    echo $_SESSION['first_name'] . ' ' . $_SESSION['last_name'];
+                                } else {
+                                    echo 'User';
+                                }
+                                ?>
+                            </span>
                             <span class="user-role">Student</span>
                         </div>
                         <svg class="dropdown-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1382,17 +1401,28 @@
                         <div class="dropdown-header">
                             <div class="dropdown-avatar">JS</div>
                             <div class="dropdown-user-info">
-                                <div class="dropdown-user-name">John Smith</div>
-                                <div class="dropdown-user-email">john.smith@email.com</div>
+                                <div class="dropdown-user-name">
+                                    <?php
+                                    if (isset($_SESSION['first_name']) && isset($_SESSION['last_name'])) {
+                                        echo $_SESSION['first_name'] . ' ' . $_SESSION['last_name'];
+                                    } else {
+                                        echo 'User';
+                                    }
+                                    ?>
+                                </div>
+                                <div class="dropdown-user-email">
+                                    <?php
+                                    if (isset($_SESSION['email'])) {
+                                        echo $_SESSION['email'];
+                                    } else {
+                                        echo 'user@example.com';
+                                    }
+                                    ?>
+                                </div>
                             </div>
                         </div>
                         <div class="dropdown-menu">
-                            <button class="dropdown-item" onclick="openProfile()">
-                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                                </svg>
-                                My Profile
-                            </button>
+                          
                             <button class="dropdown-item" onclick="openSettings()">
                                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
@@ -1400,12 +1430,7 @@
                                 </svg>
                                 Settings
                             </button>
-                            <button class="dropdown-item" onclick="openHelp()">
-                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/>
-                                </svg>
-                                Help & Support
-                            </button>
+                          
                             <div class="dropdown-divider"></div>
                             <button class="dropdown-item logout" onclick="logout()">
                                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1423,7 +1448,16 @@
         <div class="dashboard-content">
             <!-- Welcome Header -->
             <div class="welcome-header">
-                <h1>Welcome back, Student! 👋</h1>
+                <h1>Welcome back, <span>
+                     <?php
+                                // Assuming you have a session variable for the user's name
+                                if (isset($_SESSION['first_name']) && isset($_SESSION['last_name'])) {
+                                    echo $_SESSION['first_name'] . ' ' . $_SESSION['last_name'];
+                                } else {
+                                    echo 'User';
+                                }
+                                ?>
+                </span>!🙌🥰</h1>
                 <p>Upload your study materials and let AI generate summaries and quizzes for you.</p>
             </div>
 
@@ -1435,18 +1469,20 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
                         </svg>
                     </div>
+                    
                     <h2 class="upload-title">Upload your PDF study notes</h2>
                     <p class="upload-subtitle">Max size 20MB</p>
 
-                    <div class="file-input-wrapper">
-                        <input type="file" id="pdfInput" class="file-input" accept=".pdf">
+                    <form action="../../upload_logic.php" method="POST" enctype="multipart/form-data" class="file-input-wrapper">
+                        <input type="file" id="pdfInput" name="pdf_file" class="file-input" accept=".pdf" required onchange="this.form.submit()">
+                        
                         <label for="pdfInput" class="select-file-label">
-                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
                             </svg>
                             Select File
                         </label>
-                    </div>
+                    </form>
 
                     <div class="selected-file" id="selectedFile">
                         <span class="selected-file-name" id="fileName"></span>
@@ -1461,7 +1497,7 @@
 
             <!-- Action Button -->
             <div class="action-button-wrapper">
-                <button class="generate-btn" id="generateBtn" disabled>
+                <button class="generate-btn" id="generateBtn" onclick="generateSummary()">
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
                     </svg>
@@ -1470,7 +1506,7 @@
             </div>
 
             <!-- Result Placeholder -->
-            <div id="resultContainer" class="result-placeholder">
+            <div id="aiResponseArea" class="result-placeholder">
                 <div class="result-placeholder-icon">
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
@@ -1480,6 +1516,10 @@
                 <p>Upload a PDF and click generate to see your AI-created summary and quiz here.</p>
             </div>
         </div>
+    
+        <div class="created-by">
+                Created by <span>Naseerdeen Mohamed Safras</span>
+            </div>
         
     </main>
 
@@ -1569,7 +1609,7 @@
         function logout() {
             if (confirm('Are you sure you want to log out?')) {
                 // Add your logout logic here
-                window.location.href = '/login';
+                window.location.href = '/ai_study_buddy/app/views/login.php';
             }
         }
 
@@ -1579,7 +1619,7 @@
         }
 
         function openSettings() {
-            document.getElementById('settingsModal').style.display = 'flex';
+            window.location.href = '../../app/views/settings.php';
         }
 
         function openHelp() {
@@ -1589,6 +1629,38 @@
         function closeModal(modalId) {
             document.getElementById(modalId).style.display = 'none';
         }
+
+            async function generateSummary() {
+            const area = document.getElementById('aiResponseArea');
+            if (!area) return;
+
+            area.innerHTML = "⏳ AI is processing... Please wait.";
+
+            try {
+                const response = await fetch('process_ai.php');
+                const data = await response.json();
+
+                if (data.candidates && data.candidates[0].content.parts[0].text) {
+                    const summaryText = data.candidates[0].content.parts[0].text;
+                    area.innerHTML = `
+                        <div class="ai-card" style="padding: 15px; background: #eef2ff; border-radius: 8px;">
+                            <h3>✨ AI Summary</h3>
+                            <p>${summaryText.replace(/\n/g, '<br>')}</p>
+                        </div>
+                    `;
+                } else if (data.error) {
+                    area.innerHTML = `<p style="color:red;">Error: ${data.error.message}</p>`;
+                }
+            } catch (error) {
+                area.innerHTML = "<p style='color:red;'>Connection Error!</p>";
+            }
+        }
+
+        
+
+
+
+
     </script>
 </body>
 </html>
